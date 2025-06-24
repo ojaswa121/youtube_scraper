@@ -42,7 +42,7 @@ def scrape_all_channels():
     all_scraped = []
     for channel in channels:
         channel_id = scraper.get_channel_id_from_name(channel) or channel
-        videos = scraper.scrape_channel(channel_id)
+        videos = scraper.scrape_channel(channel_id=channel_id, batch_size=50, days_back=0, max_videos=None)
         storage.store_channel_data(channel, videos)
         all_scraped.extend(videos)
     return {"scraped_videos": len(all_scraped), "videos": all_scraped}
