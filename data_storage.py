@@ -166,6 +166,12 @@ class DataStorage:
         
         return output_filename
     
+    def get_all_channel_names(self):
+        """Get a list of all channel names from MongoDB or memory storage"""
+        if self.mongodb:
+            return self.mongodb.get_all_channel_names()
+        return list(self.memory_storage.keys())
+    
     def _sanitize_filename(self, filename: str) -> str:
         """Sanitize filename to be safe for filesystem"""
         # Remove or replace invalid characters
