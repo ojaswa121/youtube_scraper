@@ -154,3 +154,15 @@ class MongoDBStorage:
         """Close MongoDB connection"""
         if self.client:
             self.client.close()
+    
+    def get_all_channel_names(self):
+        """Get a list of all unique channel names in the database"""
+        if self.collection is None:
+            return []
+        
+        try:
+            channel_names = self.collection.distinct("channel_name")
+            return channel_names
+        except Exception as e:
+            st.error(f"❌ Error retrieving channel names: {str(e)}")
+            return []

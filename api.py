@@ -34,3 +34,15 @@ def scrape_channels(req: ScrapeRequest):
         storage.store_channel_data(channel, videos)
         all_scraped.extend(videos)
     return {"scraped_videos": len(all_scraped), "videos": all_scraped}
+
+@app.post("/scrape_existing")
+def scrape_all_channels():
+    # Get all unique channel names from storage
+    channels = storage.get_all_channel_names()  # You need to implement this method in DataStorage
+    all_scraped = []
+    for channel in channels:
+        channel_id = scraper.get_channel_id_from_name(channel) or channel
+        videos = scraper.scrape_channel(channel_id)
+        storage.store_channel_data(channel, videos)
+        all_scraped.extend(videos)
+    return {"scraped_videos": len(all_scraped), "videos": all_scraped}
