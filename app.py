@@ -17,7 +17,8 @@ if 'scraper' not in st.session_state:
     st.session_state.scraper = None
 if 'storage' not in st.session_state:
     mongodb_uri = os.getenv("MONGODB_URI")
-    st.session_state.storage = DataStorage(mongodb_uri=mongodb_uri)
+    postgres_uri = os.getenv("POSTGRES_URI")
+    st.session_state.storage = DataStorage(mongodb_uri=mongodb_uri, postgres_uri=postgres_uri)
 
 def main():
     st.title("🎥 YouTube Channel Data Scraper")
@@ -114,11 +115,24 @@ def main():
         help="MongoDB connection string for simultaneous storage"
     )
     
-    if mongodb_uri and st.session_state.storage.mongodb is None:
-        st.session_state.storage.mongodb = MongoDBStorage(mongodb_uri)
-        if st.session_state.storage.mongodb.connect():
-            st.session_state.storage.mongodb.create_indexes()
+    # Postgres configuration
+    st.sidebar.subheader("🐘 Postgres Configuration")
+    postgres_uri = st.sidebar.text_input(
+        "Postgres URI (optional)",
+        type="password",
+        value=os.getenv("POSTGRES_URI", ""),
+        help="Postgres connection string for simultaneous storage"
+    )
     
+    # Update storage initialization to use both URIs
+    if 'storage' not in st.session_state or \
+       st.session_state.storage.mongodb is None or \
+       getattr(st.session_state.storage, "postgres", None) is None:
+        st.session_state.storage = DataStorage(
+            mongodb_uri=mongodb_uri,
+            postgres_uri=postgres_uri
+        )
+
     # Main interface
     st.header("📝 Channel Input")
     
