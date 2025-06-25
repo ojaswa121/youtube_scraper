@@ -4,19 +4,23 @@ from datetime import datetime
 from typing import Dict, List, Any
 import streamlit as st
 from mongodb_storage import MongoDBStorage
+from postgres_storage import PostgresStorage
 
 class DataStorage:
-    def __init__(self, json_directory="data", mongodb_uri=None):
+    def __init__(self, json_directory="data", mongodb_uri=None, postgres_uri=None):
         self.json_directory = json_directory
         self.memory_storage = {}  # In-memory storage for session
-        
+
         # Create data directory if it doesn't exist
         if not os.path.exists(self.json_directory):
             os.makedirs(self.json_directory)
-        
+
         # Initialize MongoDB storage
         self.mongodb = MongoDBStorage(mongodb_uri) if mongodb_uri else None
-    
+
+        # Initialize Postgres storage
+        self.postgres = PostgresStorage(postgres_uri) if postgres_uri or os.getenv("POSTGRES_URI") else None
+
     def store_channel_data(self, channel_name: str, video_data: List[Dict[str, Any]], batch_info: Dict[str, Any] = None):
         """Store channel data in JSON, memory, and MongoDB simultaneously"""
         # Clean channel name for filename
@@ -47,6 +51,10 @@ class DataStorage:
         # Store in MongoDB if available
         if self.mongodb:
             self.mongodb.store_videos_batch(channel_name, video_data, batch_info)
+
+        # Store in Postgres if available
+        if self.postgres:
+            self.postgres.store_videos_batch(channel_name, video_data, batch_info)
         
         # Store in memory
         self.memory_storage[channel_name] = {
