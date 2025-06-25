@@ -8,10 +8,11 @@ from data_storage import DataStorage
 app = FastAPI()
 
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
-MONGODB_URI = os.getenv("MONGODB_URI")  # Set this in your environment if using MongoDB
+MONGODB_URI = os.getenv("MONGODB_URI")
+POSTGRES_URI = os.getenv("POSTGRES_URI")
 
 scraper = YouTubeScraper(YOUTUBE_API_KEY)
-storage = DataStorage(mongodb_uri=MONGODB_URI)
+storage = DataStorage(mongodb_uri=MONGODB_URI, postgres_uri=POSTGRES_URI)  # Pass Postgres URI
 
 class ScrapeRequest(BaseModel):
     channels: List[str]
@@ -30,15 +31,13 @@ def scrape_channels(req: ScrapeRequest):
             days_back=req.days_back,
             max_videos=req.max_videos
         )
-        # Store in MongoDB/JSON/memory using your DataStorage class
         storage.store_channel_data(channel, videos)
         all_scraped.extend(videos)
     return {"scraped_videos": len(all_scraped), "videos": all_scraped}
 
 @app.post("/scrape_existing")
 def scrape_all_channels():
-    # Get all unique channel names from storage
-    channels = storage.get_all_channel_names()  # You need to implement this method in DataStorage
+    channels = storage.get_all_channel_names()
     all_scraped = []
     for channel in channels:
         channel_id = scraper.get_channel_id_from_name(channel) or channel
