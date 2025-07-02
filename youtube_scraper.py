@@ -1,6 +1,5 @@
 from googleapiclient.discovery import build
 from datetime import datetime, timedelta
-import pandas as pd
 import time
 import streamlit as st
 

@@ -1,14 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-from datetime import datetime, timedelta
+from datetime import datetime
 import json
 import os
 from youtube_scraper import YouTubeScraper
 from data_storage import DataStorage
-from mongodb_storage import MongoDBStorage
 from utils import extract_channel_id, format_number, validate_api_key
+from youtube_trending import get_unique_trending_channels
 
 # Initialize session state
 if 'scraped_data' not in st.session_state:
@@ -156,6 +155,20 @@ def main():
         if st.button("🌟 T-Series Only (All Videos)", type="secondary"):
             st.session_state.preset_channels = ["T-Series"]
             st.success("✅ Ready to scrape ALL T-Series videos")
+    
+    # Fetch trending music channels
+    if st.button("🎵 Fetch Trending Music Channels (India)"):
+        trending_channels = get_unique_trending_channels(
+            api_key=os.getenv("TRENDING_API_KEY"),
+            category="music",
+            country="in",
+            language="en"
+        )
+        if trending_channels:
+            st.session_state.preset_channels = trending_channels
+            st.success(f"Loaded {len(trending_channels)} trending channels!")
+        else:
+            st.warning("No trending channels found or API error.")
     
     # Channel input methods
     input_method = st.radio(
