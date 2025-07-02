@@ -1,7 +1,8 @@
-i am scraping the metadata from the youtube and i am sharing you the code of postgres db as :import os
+import os
 import psycopg2
 from psycopg2.extras import execute_batch
 from datetime import datetime
+import json
 
 class PostgresStorage:
     def __init__(self, connection_string=None):
@@ -83,7 +84,7 @@ class PostgresStorage:
                 "duration": video.get("duration"),
                 "channel_subscriber_count": video.get("channel_subscriber_count"),
                 "scraped_at": now,
-                "batch_info": batch_info or {},
+                "batch_info": json.dumps(batch_info or {}),
             })
         try:
             with self.conn.cursor() as cur:
